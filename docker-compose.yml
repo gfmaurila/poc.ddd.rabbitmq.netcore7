@@ -1,0 +1,94 @@
+version: '3.9'
+
+networks:
+  app-crud-network:
+    driver: bridge
+
+services:
+
+  # ASP.NET Core Web API Application
+  crud-api:
+    image: ${DOCKER_REGISTRY-}crud-api
+    container_name: crud-api
+    restart: always
+    build:
+      context: .
+      dockerfile: '01 - Presentation/API/WebAPI/Dockerfile'
+    expose:
+      - 5072
+    ports:
+      - 5072:5072
+    links:
+      - sqlserver
+      - rabbitmq
+      - mongoserver
+      - redis
+    networks:
+      - app-crud-network
+    depends_on:
+      - sqlserver
+      - rabbitmq
+      - mongoserver
+      - redis
+    
+  # SQL Server
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    cap_add: [ 'SYS_PTRACE' ]
+    hostname: mssql
+    container_name: sqlserver
+    restart: always
+    expose:
+      - 1433
+    ports:
+      - 1433:1433
+    environment:
+      SA_PASSWORD: "@C23l10a1985"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    networks:
+      - app-crud-network
+
+  # Mongo Server
+  mongoserver:
+    image: mongo:latest
+    container_name: mongoserver
+    restart: always
+    expose:
+      - 27017
+    ports:
+      - 27017:27017
+    networks:
+      - app-crud-network
+
+  # Redis Cache Server
+  redis:
+    image: redis:latest
+    container_name: redis
+    command: redis-server --requirepass C23l10a1985
+    restart: always
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
+    networks:
+      - app-crud-network
+  
+  # http://localhost:15672
+  # usuário guest 
+  # senha guest
+  # Rabbit MQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    restart: always
+    expose:
+      - 15672
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - app-crud-network

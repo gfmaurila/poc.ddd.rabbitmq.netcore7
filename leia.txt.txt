@@ -1,0 +1,102 @@
+Aplicar Domain-Driven Design (DDD) implica em segmentar a lógica de negócios em domínios ou módulos. Uma estrutura de projeto adequada poderia ser algo como o seguinte:
+
+
+- Solution Name.sln
+- src/
+  - Domain/
+    - Core/
+      - Entities/
+      - ValueObjects/
+      - Interfaces/
+      - Enums/
+      - Exceptions/
+    - ModuleA/
+      - Entities/
+      - ValueObjects/
+      - Interfaces/
+      - Enums/
+      - Exceptions/
+    - ModuleB/
+      ...
+  - Infrastructure/
+    - Data/
+      - SQLServer/
+        - Config/
+        - Repositories/
+      - MongoDB/
+        - Config/
+        - Repositories/
+      - Redis/
+        - Config/
+        - Repositories/
+    - Messaging/
+      - RabbitMQ/
+        - Config/
+        - Services/
+    - HealthChecks/
+  - Application/
+    - Services/
+    - Interfaces/
+    - DTOs/
+    - Mappers/
+  - Presentation/
+    - WebAPI/
+      - Controllers/
+      - Filters/
+      - ViewModels/
+    - WorkerService/
+      - Services/
+- tests/
+  - Domain.UnitTests/
+  - Infrastructure.IntegrationTests/
+  - Application.UnitTests/
+  - Presentation.IntegrationTests/
+
+
+
+
+
+Nessa estrutura:
+
+Domain: Representa as regras de negócio do seu sistema, incluindo entidades, objetos de valor, interfaces, enums e exceções.
+
+Infrastructure: Inclui tudo que é necessário para conectar seu domínio ao "mundo externo", como bancos de dados, serviços de mensageria, etc.
+
+Application: Contém a lógica de alto nível para orquestrar suas regras de negócio.
+
+Presentation: Contém os endpoints da API, views, controladores, etc.
+
+tests: Contém todos os testes relacionados ao domínio, infraestrutura, aplicação e apresentação.
+
+Esta estrutura pode ser ajustada de acordo com as necessidades específicas do seu projeto. Lembre-se, DDD é sobre modelar o software de acordo com o domínio do negócio, portanto, é mais uma orientação do que um conjunto rígido de regras.
+
+
+
+
+
+
+Data.SQLServer
+
+Microsoft.EntityFrameworkCore
+Microsoft.EntityFrameworkCore.Design
+Microsoft.EntityFrameworkCore.SqlServer
+Microsoft.EntityFrameworkCore.Tools
+
+IOC
+AutoMapper
+Microsoft.Extensions.Configuration
+Microsoft.EntityFrameworkCore
+Microsoft.Extensions.DependencyInjection
+
+Domain
+FluentValidation
+
+API
+Microsoft.EntityFrameworkCore.Design
+Swashbuckle.AspNetCore
+
+
+
+
+docker-compose up
+
