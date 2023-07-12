@@ -28,6 +28,23 @@
 
 - No geral, com esta arquitetura, alcançamos uma API simples, eficiente e fácil de manter, que oferece alto desempenho e confiabilidade.
 
+# Health Checks
+- https://localhost:7102/monitor#/healthchecks
+- https://libraries.io/nuget/AspNetCore.HealthChecks.Rabbitmq
+
+# Projeto 
+- http://localhost:5072/index.html
+- http://localhost:5072/swagger/index.html
+
+# Docker
+- http://localhost:5072/swagger/index.html
+
+# RabbitMQ
+- http://localhost:15672
+
+# SQLServer
+- Server=sqlserver;Integrated Security=true;Initial Catalog=Demo12072023;User Id=sa;Password=@C23l10a1985;Trusted_Connection=false;MultipleActiveResultSets=true;Encrypt=True;TrustServerCertificate=True;
+
 
 ## Autor
 
