@@ -7,9 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Config\" />
     <Folder Include="Services\Consumers\" />
     <Folder Include="Services\Producer\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\03 - Domain\Domain.Contract\Domain.Contract.csproj" />
   </ItemGroup>
 
 </Project>

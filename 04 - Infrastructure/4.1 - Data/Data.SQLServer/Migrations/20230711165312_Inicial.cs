@@ -50,7 +50,7 @@ namespace Data.SQLServer.Migrations
                                             DECLARE @BirthDate DATETIME2 = DATEADD(YEAR, -20, GETDATE());
                                             DECLARE @Active BIT = 1;
                                             DECLARE @Password NVARCHAR(MAX) = 'Password' + CAST(@i AS NVARCHAR);
-                                            DECLARE @Role NVARCHAR(MAX) = 'Role' + CAST((@i % 5) AS NVARCHAR);
+                                            DECLARE @Role NVARCHAR(MAX) = 'Admin';
                                             DECLARE @Modified DATETIME2 = GETDATE();
 
                                             INSERT INTO [dbo].[User] ([FullName], [Email], [Phone], [BirthDate], [Active], [Password], [Role], [Modified])
@@ -58,6 +58,10 @@ namespace Data.SQLServer.Migrations
 
                                             SET @i = @i + 1;
                                         END
+
+                                        INSERT INTO [dbo].[User] ([FullName], [Email], [Phone], [BirthDate], [Active], [Password], [Role], [Modified])
+                                        VALUES ('Guilherme F Maurila','gfmaurila@gmail.com', '51985623312', GETDATE(), 1, '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', GETDATE());
+
                                     END
                                     GO ");
 

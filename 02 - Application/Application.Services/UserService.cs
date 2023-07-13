@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.Helper;
 using Application.Responses;
 using Application.Validators;
 using Ardalis.Result;
@@ -71,6 +72,7 @@ public class UserService : IUserService
         if (await _repo.ExistsByEmailAsync(new Email(dto.Email)))
             return Result.Error("O endereço de e-mail informado já está sendo utilizado.");
 
+        dto.Password = HashHelper.ComputeSha256Hash(dto.Password);
         var entityCreated = await _repo.Create(_mapper.Map<User>(dto));
         await _unitOfWork.SaveChangesAsync();
 
@@ -94,6 +96,7 @@ public class UserService : IUserService
         if (await _repo.ExistsByEmailAsync(new Email(dto.Email), objEntity.Id))
             return Result.Error("O endereço de e-mail informado já está sendo utilizado.");
 
+        dto.Password = HashHelper.ComputeSha256Hash(dto.Password);
         var entityUpdate = await _repo.Update(_mapper.Map<User>(dto));
         await _unitOfWork.SaveChangesAsync();
 

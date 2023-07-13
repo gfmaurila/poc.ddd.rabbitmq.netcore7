@@ -13,9 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Ardalis.Result" Version="7.1.0" />
     <PackageReference Include="Ardalis.Result.FluentValidation" Version="7.1.0" />
-    <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="7.0.0-rc2.8" />
     <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="6.0.2" />
-    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="6.0.2" />
     <PackageReference Include="AspNetcore.HealthChecks.Publisher.ApplicationInsights" Version="6.0.2" />
     <PackageReference Include="AspNetcore.HealthChecks.Publisher.Datadog" Version="6.0.2" />
     <PackageReference Include="AspNetcore.HealthChecks.Publisher.Prometheus" Version="6.0.2" />
@@ -26,7 +24,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.5" />
     <PackageReference Include="AspnetCore.HealthChecks.UI.Client" Version="6.0.5" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="6.0.5" />
-    <PackageReference Include="Confluent.Kafka" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0" />

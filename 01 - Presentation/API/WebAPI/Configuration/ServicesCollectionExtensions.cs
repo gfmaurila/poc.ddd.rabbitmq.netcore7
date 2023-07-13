@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
+using System.Text;
 
 namespace WebAPI.Configuration;
 public static class ServicesCollectionExtensions
@@ -9,24 +11,54 @@ public static class ServicesCollectionExtensions
     {
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "DEMO.API", Version = "v1" });
+
+            //Definição de segurança do Swagger
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Title = "Projeto DDD .NET Core 7",
-                Version = "v1",
-                Description = "Projeto DDD .NET Core 7",
-                Contact = new OpenApiContact
-                {
-                    Name = "Guilherme F Maurila",
-                    Email = "gfmaurila@gmail.com",
-                    Url = new Uri("https://github.com/gfmaurila"),
-                }
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "JWT Authorization header usando o esquema Bearer."
             });
 
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            c.IncludeXmlComments(xmlPath);
+            //
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
         });
 
+
+        services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+
+                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidAudience = configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey
+                (Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+            };
+        });
         return services;
     }
 

@@ -19,4 +19,10 @@ public class UserEFRepository : BaseRepository<User>, IUserRepository
 
     public async Task<bool> ExistsByEmailAsync(Email email, int id)
         => await _context.User.AsNoTracking().AnyAsync(f => f.Email.Address == email.Address && f.Id != id);
+
+    public async Task<User> GetUserByEmailAndPasswordAsync(string email, string passwordHash)
+    {
+        var find = await _context.User.AsNoTracking().Where(u => u.Email.Address == email && u.Password == passwordHash).ToListAsync();
+        return find.FirstOrDefault();
+    }
 }

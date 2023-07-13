@@ -30,6 +30,11 @@ public class UserDapperRepository : IUserRepository
         throw new NotImplementedException();
     }
 
+    public Task<User> GetUserByEmailAndPasswordAsync(string email, string passwordHash)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<bool> Remove(int id)
     {
         throw new NotImplementedException();

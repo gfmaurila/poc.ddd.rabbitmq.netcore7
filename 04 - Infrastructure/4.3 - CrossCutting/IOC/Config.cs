@@ -12,6 +12,7 @@ using Domain.Contract.Redis;
 using Domain.Contract.Repositories;
 using Domain.Contract.Services;
 using Domain.Contract.Services.Event;
+using Messaging.RabbitMQ.Config;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,6 +55,7 @@ public class Config
 
     public static void ConfigService(IServiceCollection services)
     {
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
     }
 
@@ -71,5 +73,6 @@ public class Config
 
     public static void ConfigBusService(IServiceCollection services)
     {
+        services.AddScoped<IMessageBusService, MessageBusService>();
     }
 }

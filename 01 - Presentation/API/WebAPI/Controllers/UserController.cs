@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Responses;
 using Domain.Contract.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 using WebAPI.Configuration;
@@ -13,6 +14,7 @@ namespace WebAPI.Controllers;
 /// </summary>
 [Route("api/user")]
 [ApiController]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserService _service;
@@ -83,7 +85,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Update([FromBody] UserDto request)
-        => Ok(await _service.Update(request));
+        => (await _service.Update(request)).ToActionResult();
 
     /// <summary>
     /// Deleta o usuário pelo Id.
