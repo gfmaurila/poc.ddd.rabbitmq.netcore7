@@ -39,10 +39,13 @@ namespace Data.SQLServer.Migrations
 
             migrationBuilder.Sql(@"
                                     CREATE PROCEDURE GenerateUserInserts
+                                        @inicio INT,
+                                        @fim INT
                                     AS
                                     BEGIN
-                                        DECLARE @i INT = 1;
-                                        WHILE (@i <= 15000)
+                                        DECLARE @i INT = @inicio;
+
+                                        WHILE (@i <= @fim)
                                         BEGIN
                                             DECLARE @FullName NVARCHAR(MAX) = 'User' + CAST(@i AS NVARCHAR);
                                             DECLARE @Email NVARCHAR(MAX) = 'user' + CAST(@i AS NVARCHAR) + '@example.com';
@@ -58,14 +61,16 @@ namespace Data.SQLServer.Migrations
 
                                             SET @i = @i + 1;
                                         END
-
-                                        INSERT INTO [dbo].[User] ([FullName], [Email], [Phone], [BirthDate], [Active], [Password], [Role], [Modified])
-                                        VALUES ('Guilherme F Maurila','gfmaurila@gmail.com', '51985623312', GETDATE(), 1, '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', GETDATE());
-
                                     END
-                                    GO ");
+                                    GO
+                                ");
 
-            migrationBuilder.Sql(@"EXEC GenerateUserInserts");
+            migrationBuilder.Sql(@"EXEC GenerateUserInserts @inicio = 1, @fim = 100");
+
+            migrationBuilder.Sql(@"
+                                    INSERT INTO [dbo].[User] ([FullName], [Email], [Phone], [BirthDate], [Active], [Password], [Role], [Modified])
+                                    VALUES ('Guilherme F Maurila','gfmaurila@gmail.com', '51985623312', GETDATE(), 1, '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', GETDATE());
+            ");
 
         }
 

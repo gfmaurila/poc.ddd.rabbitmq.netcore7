@@ -6,35 +6,78 @@ namespace Data.Repository.Redis;
 
 public class CacheRepository : ICacheRepository
 {
-    private readonly IDatabase _database;
     private readonly IConnectionMultiplexer _multiplexer;
 
     public CacheRepository(IConnectionMultiplexer multiplexer)
     {
         _multiplexer = multiplexer;
-        _database = _multiplexer.GetDatabase();
     }
 
-    public async Task SetAsync<T>(string key, T entity)
+    public async Task CreateBatch<T>(string key, T entity, int database = 0)
     {
+        IDatabase db = _multiplexer.GetDatabase(database);
+        var serializedEntity = JsonConvert.SerializeObject(entity);
+
+        var tran = db.CreateTransaction();
+        tran.StringSetAsync(key, serializedEntity);
+
+        await tran.ExecuteAsync();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="key"></param>
+    /// <param name="entity"></param>
+    /// <param name="tempo"></param>
+    /// <param name="database"></param>
+    /// <returns></returns>
+    public async Task CreateBatch<T>(string key, T entity, TimeSpan tempo, int database = 0)
+    {
+        IDatabase db = _multiplexer.GetDatabase(database);
+        var serializedEntity = JsonConvert.SerializeObject(entity);
+
+        var tran = db.CreateTransaction();
+        tran.StringSetAsync(key, serializedEntity, tempo);
+
+        await tran.ExecuteAsync();
+    }
+
+    /// <summary>
+    /// Exemplo de uso
+    /// var mapperdto = _mapper.Map<UserDto>(objEntity);
+    /// await _repoCache.SetAsync($"user_id_{mapperdto.Id}", mapperdto, 0);
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="key"></param>
+    /// <param name="entity"></param>
+    /// <param name="database"></param>
+    /// <returns></returns>
+    public async Task SetAsync<T>(string key, T entity, int database = 0)
+    {
+        IDatabase _database = _multiplexer.GetDatabase(database);
         var serializedEntity = JsonConvert.SerializeObject(entity);
         await _database.StringSetAsync(key, serializedEntity);
     }
 
-    public async Task SetAsync<T>(string key, T entity, TimeSpan tempo)
+    public async Task SetAsync<T>(string key, T entity, TimeSpan tempo, int database = 0)
     {
+        IDatabase _database = _multiplexer.GetDatabase(database);
         var serializedEntity = JsonConvert.SerializeObject(entity);
         await _database.StringSetAsync(key, serializedEntity, tempo);
     }
 
-    public async Task SetAsyncAll<T>(string key, List<T> entity, TimeSpan tempo)
+    public async Task SetAsyncAll<T>(string key, List<T> entity, TimeSpan tempo, int database = 0)
     {
+        IDatabase _database = _multiplexer.GetDatabase(database);
         var serializedEntity = JsonConvert.SerializeObject(entity);
         await _database.StringSetAsync(key, serializedEntity, tempo);
     }
 
-    public async Task<List<T>> StringGetAllAsync<T>()
+    public async Task<List<T>> StringGetAllAsync<T>(int database = 0)
     {
+        IDatabase _database = _multiplexer.GetDatabase(database);
         var keys = _multiplexer.GetServer(_multiplexer.GetEndPoints().First()).Keys();
         var results = new List<T>();
 
@@ -51,16 +94,18 @@ public class CacheRepository : ICacheRepository
         return results;
     }
 
-    public async Task<List<T>> StringGetAllByKeyAsync<T>(string key)
+    public async Task<List<T>> StringGetAllByKeyAsync<T>(string key, int database = 0)
     {
+        IDatabase _database = _multiplexer.GetDatabase(database);
         var value = await _database.StringGetAsync(key);
         if (value.IsNullOrEmpty)
             return null;
         return JsonConvert.DeserializeObject<List<T>>(value);
     }
 
-    public async Task<T> StringGetAsync<T>(string key)
+    public async Task<T> StringGetAsync<T>(string key, int database = 0)
     {
+        IDatabase _database = _multiplexer.GetDatabase(database);
         var value = await _database.StringGetAsync(key);
         if (value.IsNullOrEmpty)
             return default;

@@ -8,11 +8,14 @@ using Data.Repository.Repositories;
 using Data.Repository.Repositories.EF;
 using Data.SQLServer.Config;
 using Domain.Contract.MongoDb;
+using Domain.Contract.Producer;
 using Domain.Contract.Redis;
 using Domain.Contract.Repositories;
 using Domain.Contract.Services;
 using Domain.Contract.Services.Event;
 using Messaging.RabbitMQ.Config;
+using Messaging.RabbitMQ.Services.Consumers;
+using Messaging.RabbitMQ.Services.Producer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -74,5 +77,12 @@ public class Config
     public static void ConfigBusService(IServiceCollection services)
     {
         services.AddScoped<IMessageBusService, MessageBusService>();
+        services.AddScoped<ICreateUserAllProducer, CreateUserAllProducer>();
+        services.AddScoped<ICreateUserProducer, CreateUserProducer>();
+        services.AddScoped<IDeleteUserProducer, DeleteUserProducer>();
+
+        services.AddHostedService<CreateUserAllConsumer>();
+        services.AddHostedService<CreateUserConsumer>();
+        services.AddHostedService<DeleteUserConsumer>();
     }
 }

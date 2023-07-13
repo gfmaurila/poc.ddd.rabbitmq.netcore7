@@ -2,19 +2,19 @@
 
 namespace Application.DTOs;
 
-public class UserDto
+public class UserListDto
 {
-    public UserDto()
+    public UserListDto()
     {
     }
 
-    public UserDto(int id)
+    public UserListDto(int id)
     {
         Id = id;
     }
 
     [JsonConstructor]
-    public UserDto(int id, string fullName, string email, string phone, DateTime birthDate, DateTime modified, bool active, string password, string role)
+    public UserListDto(int id, string fullName, string email, string phone, DateTime birthDate, DateTime modified, bool active, string role)
     {
         Id = id;
         FullName = fullName;
@@ -23,7 +23,6 @@ public class UserDto
         BirthDate = birthDate;
         Modified = modified;
         Active = active;
-        Password = password;
         Role = role;
     }
 
@@ -34,6 +33,5 @@ public class UserDto
     public DateTime BirthDate { get; set; }
     public DateTime Modified { get; set; }
     public bool Active { get; set; }
-    public string Password { get; set; }
     public string Role { get; set; }
 }

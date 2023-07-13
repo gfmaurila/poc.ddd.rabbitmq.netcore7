@@ -5,6 +5,7 @@ using Application.Validators;
 using Ardalis.Result;
 using Ardalis.Result.FluentValidation;
 using AutoMapper;
+using Domain.Contract.Producer;
 using Domain.Contract.Redis;
 using Domain.Contract.Repositories;
 using Domain.Contract.Services;
@@ -16,53 +17,64 @@ namespace Application.Services;
 public class UserService : IUserService
 {
     private readonly IMapper _mapper;
+    private readonly ICreateUserAllProducer _producesAll;
+    private readonly ICreateUserProducer _producesCreateUser;
+    private readonly IDeleteUserProducer _producesDeleteUser;
     private readonly IUserRepository _repo;
     private readonly ICacheRepository _repoCache;
     private readonly CreateUserValidator _validator;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UserService(CreateUserValidator validator,
+    public UserService(ICreateUserAllProducer producesAll,
+                       ICreateUserProducer producesCreateUser,
+                       IDeleteUserProducer producesDeleteUser,
+                       CreateUserValidator validator,
                        IMapper mapper,
                        IUserRepository repo,
                        IUnitOfWork unitOfWork,
                        ICacheRepository repoCache)
     {
         _mapper = mapper;
+        _producesAll = producesAll;
+        _producesCreateUser = producesCreateUser;
+        _producesDeleteUser = producesDeleteUser;
         _repo = repo;
         _validator = validator;
         _unitOfWork = unitOfWork;
         _repoCache = repoCache;
+
     }
 
-    public async Task<Result<UserDto>> Get(int id)
+    #region Get and GetById
+    public async Task<Result<UserListDto>> Get(int id)
     {
-        var userRedis = await _repoCache.StringGetAsync<UserDto>($"user_id_{id}");
+        var userRedis = await _repoCache.StringGetAsync<UserListDto>($"user_id_{id}", 0);
 
         if (userRedis != null)
             return Result.Success(userRedis);
 
-        var objEntity = _mapper.Map<UserDto>(await _repo.Get(id));
+        var objEntity = _mapper?.Map<UserListDto>(await _repo.Get(id));
         if (objEntity == null)
             return Result.NotFound($"Nenhum registro encontrado pelo Id: {id}");
 
-        // Add Fila para armazenar no redis 
-        var mapperdto = _mapper.Map<UserDto>(objEntity);
-        await _repoCache.SetAsync($"user_id_{mapperdto.Id}", mapperdto);
+        _producesCreateUser.Publish(objEntity);
 
         return Result.Success(objEntity);
     }
 
-    public async Task<Result<List<UserDto>>> Get()
+    public async Task<Result<List<UserListDto>>> Get()
     {
-        var userRedis = await _repoCache.StringGetAllAsync<UserDto>();
+        var userRedis = await _repoCache.StringGetAllAsync<UserListDto>(0);
 
         if (!userRedis.IsNullOrEmpty())
             return Result.Success(userRedis);
 
-        // implementar um envio 
-        return Result.Success(_mapper.Map<List<UserDto>>(await _repo.Get()));
+        _producesAll.Publish();
+        return Result.Success(_mapper.Map<List<UserListDto>>(await _repo.Get()));
     }
+    #endregion
 
+    #region Create, Update and Delete
     public async Task<Result<CreatedUserResponse>> Create(UserDto dto)
     {
         var validationResult = await _validator.ValidateAsync(dto);
@@ -76,9 +88,7 @@ public class UserService : IUserService
         var entityCreated = await _repo.Create(_mapper.Map<User>(dto));
         await _unitOfWork.SaveChangesAsync();
 
-        // Add Fila para armazenar no redis 
-        var mapperdto = _mapper.Map<UserDto>(entityCreated);
-        await _repoCache.SetAsync($"user_id_{mapperdto.Id}", mapperdto);
+        _producesCreateUser.Publish(_mapper.Map<UserListDto>(entityCreated));
 
         return Result.Success(new CreatedUserResponse(entityCreated.Id), "Cadastrado com sucesso!");
     }
@@ -100,9 +110,7 @@ public class UserService : IUserService
         var entityUpdate = await _repo.Update(_mapper.Map<User>(dto));
         await _unitOfWork.SaveChangesAsync();
 
-        // Add Fila para armazenar no redis 
-        var mapperdto = _mapper.Map<UserDto>(entityUpdate);
-        await _repoCache.SetAsync($"user_id_{mapperdto.Id}", mapperdto);
+        _producesCreateUser.Publish(_mapper.Map<UserListDto>(entityUpdate));
 
         return Result.SuccessWithMessage("Atualizado com sucesso!");
     }
@@ -114,15 +122,35 @@ public class UserService : IUserService
         if (objEntity == null)
             return Result.NotFound($"Nenhum registro encontrado pelo Id: {id}");
 
-        // Add BKP por mais 30 dias esse redistro removido
-        // Add Fila para armazenar no redis 
-        var mapperdto = _mapper.Map<UserDto>(objEntity);
-        await _repoCache.SetAsync($"user_delete_id_{mapperdto.Id}", mapperdto);
+        _producesDeleteUser.Publish(_mapper.Map<UserListDto>(objEntity));
 
         await _repo.Remove(id);
         await _unitOfWork.SaveChangesAsync();
 
-        // Add Fila para armazenar no redis 
+        _producesAll.Publish();
         return Result.SuccessWithMessage("Removido com sucesso!");
     }
+    #endregion
+
+    #region CreateRedis
+    public async Task CreateRedis()
+    {
+        var users = await _repo.Get();
+        foreach (var user in users)
+        {
+            var mapperdto = _mapper.Map<UserDto>(user);
+            await _repoCache.CreateBatch($"user_id_{mapperdto.Id}", mapperdto, TimeSpan.FromHours(1), 0);
+        }
+    }
+
+    public async Task CreateRedis(UserListDto dto)
+    {
+        await _repoCache.SetAsync($"user_id_{dto.Id}", dto, 0);
+    }
+
+    public async Task CreateRedisDelete(UserListDto dto)
+    {
+        await _repoCache.SetAsync($"user_delete_id_{dto.Id}", dto, 1);
+    }
+    #endregion
 }
