@@ -54,8 +54,8 @@ public class CreateUserConsumer : BackgroundService
     {
         using (var scope = _serviceProvider.CreateScope())
         {
-            var createUserRedis = scope.ServiceProvider.GetRequiredService<IUserService>();
-            await createUserRedis.CreateRedis(dto);
+            var createUserRedis = scope.ServiceProvider.GetRequiredService<IUserRedisService>();
+            await createUserRedis.CreateRedis($"user_id_{dto.Id}", dto, 0);
         }
     }
 }

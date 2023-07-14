@@ -9,14 +9,14 @@ using System.Text.Json;
 
 namespace Messaging.RabbitMQ.Services.Consumers;
 
-public class DeleteUserConsumer : BackgroundService
+public class CreateUserPerfilConsumer : BackgroundService
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
     private readonly IServiceProvider _serviceProvider;
-    private const string QUEUE_NAME = "DELETE_USER";
+    private const string QUEUE_NAME = "CREATE_USER_PERFIL";
 
-    public DeleteUserConsumer(IServiceProvider serviceProvider)
+    public CreateUserPerfilConsumer(IServiceProvider serviceProvider)
     {
         var factory = new ConnectionFactory
         {
@@ -55,7 +55,7 @@ public class DeleteUserConsumer : BackgroundService
         using (var scope = _serviceProvider.CreateScope())
         {
             var createUserRedis = scope.ServiceProvider.GetRequiredService<IUserRedisService>();
-            await createUserRedis.CreateRedis($"user_delete_id_{dto.Id}", dto, 1);
+            await createUserRedis.CreateRedis($"user_perfil_id_{dto.Id}", dto, 2);
         }
     }
 }

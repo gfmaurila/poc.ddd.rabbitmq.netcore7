@@ -3,6 +3,7 @@ using Application.Request;
 using Application.Services;
 using ApplicationTest.Fixture;
 using AutoMapper;
+using Domain.Contract.Producer;
 using Domain.Contract.Repositories;
 using Domain.Core.Entities;
 using NSubstitute;
@@ -15,6 +16,7 @@ public class AuthServiceTest
 {
     private readonly IMapper _mapper;
     private readonly IUserRepository _repo;
+    private readonly ICreateUserPerfilProducer _perfilProducer;
     private readonly AuthServiceFixture _fixture;
     private readonly AuthService _authService;
     public AuthRequest InvalidRequest { get; private set; }
@@ -23,9 +25,10 @@ public class AuthServiceTest
     {
         _mapper = Substitute.For<IMapper>();
         _repo = Substitute.For<IUserRepository>();
+        _perfilProducer = Substitute.For<ICreateUserPerfilProducer>();
         _fixture = fixture;
 
-        _authService = new AuthService(_fixture.Configuration, _mapper, _repo);
+        _authService = new AuthService(_fixture.Configuration, _mapper, _repo, _perfilProducer);
     }
 
     [Fact]

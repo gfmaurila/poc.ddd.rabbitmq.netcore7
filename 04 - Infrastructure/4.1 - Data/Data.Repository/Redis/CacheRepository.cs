@@ -1,4 +1,5 @@
 ﻿using Domain.Contract.Redis;
+using Domain.Core.Model;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
@@ -73,6 +74,38 @@ public class CacheRepository : ICacheRepository
         IDatabase _database = _multiplexer.GetDatabase(database);
         var serializedEntity = JsonConvert.SerializeObject(entity);
         await _database.StringSetAsync(key, serializedEntity, tempo);
+    }
+
+    public async Task<PaginationResult<T>> StringGetAllAsync<T>(int pageNumber, int pageSize, int database = 0)
+    {
+        IDatabase _database = _multiplexer.GetDatabase(database);
+        var keys = _multiplexer.GetServer(_multiplexer.GetEndPoints().First()).Keys().ToArray();
+        var totalCount = keys.Length;
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        var startIndex = (pageNumber - 1) * pageSize;
+        var endIndex = startIndex + pageSize - 1;
+        var results = new List<T>();
+
+        for (int i = startIndex; i <= endIndex && i < keys.Length; i++)
+        {
+            var key = keys[i];
+            var value = await _database.StringGetAsync(key);
+            if (!value.IsNullOrEmpty)
+            {
+                var result = JsonConvert.DeserializeObject<T>(value);
+                results.Add(result);
+            }
+        }
+
+        return new PaginationResult<T>
+        {
+            Data = results,
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            QtdPge = totalPages
+        };
     }
 
     public async Task<List<T>> StringGetAllAsync<T>(int database = 0)

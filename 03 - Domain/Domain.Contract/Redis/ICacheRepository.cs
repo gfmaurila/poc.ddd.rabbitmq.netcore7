@@ -1,4 +1,6 @@
-﻿namespace Domain.Contract.Redis;
+﻿using Domain.Core.Model;
+
+namespace Domain.Contract.Redis;
 public interface ICacheRepository
 {
     Task SetAsyncAll<T>(string key, List<T> entity, TimeSpan tempo, int database);
@@ -9,4 +11,5 @@ public interface ICacheRepository
     Task<T> StringGetAsync<T>(string key, int database);
     Task<List<T>> StringGetAllByKeyAsync<T>(string key, int database);
     Task<List<T>> StringGetAllAsync<T>(int database);
+    Task<PaginationResult<T>> StringGetAllAsync<T>(int pageNumber, int pageSize, int database = 0);
 }

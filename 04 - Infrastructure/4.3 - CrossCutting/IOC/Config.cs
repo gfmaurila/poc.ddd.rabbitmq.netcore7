@@ -60,6 +60,7 @@ public class Config
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserRedisService, UserRedisService>();
     }
 
     public static void ConfigEvent(IServiceCollection services)
@@ -80,9 +81,11 @@ public class Config
         services.AddScoped<ICreateUserAllProducer, CreateUserAllProducer>();
         services.AddScoped<ICreateUserProducer, CreateUserProducer>();
         services.AddScoped<IDeleteUserProducer, DeleteUserProducer>();
+        services.AddScoped<ICreateUserPerfilProducer, CreateUserPerfilProducer>();
 
         services.AddHostedService<CreateUserAllConsumer>();
         services.AddHostedService<CreateUserConsumer>();
         services.AddHostedService<DeleteUserConsumer>();
+        services.AddHostedService<CreateUserPerfilConsumer>();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Domain.Contract.Repositories;
 using Domain.Core.Entities;
+using Domain.Core.Model;
 using Domain.Core.ValueObjects;
 
 namespace Data.Repository.Repositories.Dapper;
@@ -26,6 +27,11 @@ public class UserDapperRepository : IUserRepository
     }
 
     public Task<List<User>> Get()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<PaginationResult<User>> GetAllAsync(int pageNumber, int pageSize)
     {
         throw new NotImplementedException();
     }

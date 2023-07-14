@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Responses;
 using Domain.Contract.Services;
+using Domain.Core.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
@@ -20,6 +21,22 @@ public class UserController : ControllerBase
     private readonly IUserService _service;
     public UserController(IUserService service)
         => _service = service;
+
+    /// <summary>
+    /// Obtém uma lista paginada de usuários.
+    /// </summary>
+    /// <param name="pageNumber">O número da página desejada. O valor padrão é 1.</param>
+    /// <param name="pageSize">O tamanho da página. O valor padrão é 10.</param>
+    /// <returns>A lista de usuários paginada.</returns>
+    /// <response code="200">Retorna a lista de usuários paginada.</response>
+    /// <response code="500">Quando ocorre um erro interno inesperado no servidor.</response>
+    [HttpGet("pagination/{PageNumber:int}/{PageSize:int}")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(ApiResponse<PaginationResult<UserListDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Get(int pageNumber = 1, int pageSize = 10)
+        => (await _service.GetAllAsync(pageNumber, pageSize)).ToActionResult();
 
     /// <summary>
     /// Obtém uma lista com todos os usuários.

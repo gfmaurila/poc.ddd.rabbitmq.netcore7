@@ -10,6 +10,7 @@ using Domain.Contract.Redis;
 using Domain.Contract.Repositories;
 using Domain.Contract.Services;
 using Domain.Core.Entities;
+using Domain.Core.Model;
 using Domain.Core.ValueObjects;
 using Microsoft.IdentityModel.Tokens;
 
@@ -46,6 +47,41 @@ public class UserService : IUserService
     }
 
     #region Get and GetById
+    public async Task<Result<List<UserListDto>>> Get()
+    {
+        var userRedis = await _repoCache.StringGetAllAsync<UserListDto>(0);
+
+        if (!userRedis.IsNullOrEmpty())
+            return Result.Success(userRedis);
+
+        _producesAll.Publish();
+        return Result.Success(_mapper.Map<List<UserListDto>>(await _repo.Get()));
+    }
+
+    public async Task<Result<PaginationResult<UserListDto>>> GetAllAsync(int pageNumber, int pageSize)
+    {
+        var userRedis = await _repoCache.StringGetAllAsync<UserListDto>(pageNumber, pageSize, 0);
+
+        if (!userRedis.Data.IsNullOrEmpty())
+            return Result.Success(userRedis);
+
+        var result = await _repo.GetAllAsync(pageNumber, pageSize);
+
+        var userListDto = _mapper.Map<List<UserListDto>>(result.Data);
+
+        _producesAll.Publish();
+
+        return new PaginationResult<UserListDto>
+        {
+            Data = userListDto,
+            TotalCount = result.TotalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            QtdPge = result.QtdPge
+        };
+    }
+
+
     public async Task<Result<UserListDto>> Get(int id)
     {
         var userRedis = await _repoCache.StringGetAsync<UserListDto>($"user_id_{id}", 0);
@@ -60,17 +96,6 @@ public class UserService : IUserService
         _producesCreateUser.Publish(objEntity);
 
         return Result.Success(objEntity);
-    }
-
-    public async Task<Result<List<UserListDto>>> Get()
-    {
-        var userRedis = await _repoCache.StringGetAllAsync<UserListDto>(0);
-
-        if (!userRedis.IsNullOrEmpty())
-            return Result.Success(userRedis);
-
-        _producesAll.Publish();
-        return Result.Success(_mapper.Map<List<UserListDto>>(await _repo.Get()));
     }
     #endregion
 
@@ -143,14 +168,9 @@ public class UserService : IUserService
         }
     }
 
-    public async Task CreateRedis(UserListDto dto)
+    public async Task CreateRedis(string key, UserListDto dto, int db)
     {
-        await _repoCache.SetAsync($"user_id_{dto.Id}", dto, 0);
-    }
-
-    public async Task CreateRedisDelete(UserListDto dto)
-    {
-        await _repoCache.SetAsync($"user_delete_id_{dto.Id}", dto, 1);
+        await _repoCache.SetAsync(key, dto, db);
     }
     #endregion
 }

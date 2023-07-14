@@ -69,7 +69,7 @@ namespace Data.SQLServer.Migrations
 
             migrationBuilder.Sql(@"
                                     INSERT INTO [dbo].[User] ([FullName], [Email], [Phone], [BirthDate], [Active], [Password], [Role], [Modified])
-                                    VALUES ('Guilherme F Maurila','gfmaurila@gmail.com', '51985623312', GETDATE(), 1, '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', GETDATE());
+                                    VALUES ('Guilherme F Maurila','gfmaurila@gmail.com', '51985623312', GETDATE(), 1, '488fbbee1a02028a2af9311ebb76698aa31c89d1de9b603a79ce9f0c1e31cd44', 'Admin', GETDATE());
             ");
 
         }

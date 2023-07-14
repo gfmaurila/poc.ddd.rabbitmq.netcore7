@@ -1,8 +1,10 @@
-﻿using Application.Helper;
+﻿using Application.DTOs;
+using Application.Helper;
 using Application.Request;
 using Application.Responses;
 using Ardalis.Result;
 using AutoMapper;
+using Domain.Contract.Producer;
 using Domain.Contract.Repositories;
 using Domain.Contract.Services;
 using Microsoft.Extensions.Configuration;
@@ -18,13 +20,16 @@ public class AuthService : IAuthService
 {
     private readonly IMapper _mapper;
     private readonly IUserRepository _repo;
+    private readonly ICreateUserPerfilProducer _perfilProducer;
     private readonly IConfiguration _configuration;
 
     public AuthService(IConfiguration configuration,
                        IMapper mapper,
-                       IUserRepository repo)
+                       IUserRepository repo,
+                       ICreateUserPerfilProducer perfilProducer)
     {
         _mapper = mapper;
+        _perfilProducer = perfilProducer;
         _repo = repo;
         _configuration = configuration;
     }
@@ -37,6 +42,7 @@ public class AuthService : IAuthService
         if (user == null)
             return Result.NotFound($"Usuário ou senha inválido!");
 
+        _perfilProducer.Publish(_mapper.Map<UserListDto>(user));
 
         //Se existir, gera o token usando os dados do usuário
         var token = GenerateJwtToken(user.Email.Address, user.Role);
